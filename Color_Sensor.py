@@ -53,11 +53,13 @@ args = parser.parse_args()
 
 # NT Client
 class Client(object):
+    """Demonstrates an object with magic networktables properties"""
     red = ntproperty("/SmartDashboard/colorSensorRed", 0)
     green = ntproperty("/SmartDashboard/colorSensorGreen", 0)
     blue = ntproperty("/SmartDashboard/colorSensorBlue", 0)
     if args.ir:
         ir = ntproperty("/SmartDashboard/colorSensorIr", 0)
+
     if args.proximity:
         prox = ntproperty("/SmartDashboard/colorSensorProx", 0)
 
