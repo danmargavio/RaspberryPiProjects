@@ -53,13 +53,13 @@ args = parser.parse_args()
 
 # NT Client
 class Client(object):
-    red = ntproperty("/SmartDashboard/colorSensorRed", 0)
-    green = ntproperty("/SmartDashboard/colorSensorGreen", 0)
-    blue = ntproperty("/SmartDashboard/colorSensorBlue", 0)
+    red = ntproperty("/RevColorSensor_V3/colorSensorRed", 0)
+    green = ntproperty("/RevColorSensor_V3/colorSensorGreen", 0)
+    blue = ntproperty("/RevColorSensor_V3/colorSensorBlue", 0)
     if args.ir:
-        ir = ntproperty("/SmartDashboard/colorSensorIr", 0)
+        ir = ntproperty("/RevColorSensor_V3/colorSensorIr", 0)
     if args.proximity:
-        prox = ntproperty("/SmartDashboard/colorSensorProx", 0)
+        prox = ntproperty("/RevColorSensor_V3/colorSensorProx", 0)
 
 
 def rgb_to_hex(r, g, b):
@@ -112,9 +112,10 @@ def update_vals():
         if args.proximity:
             prox = get_prox()
             c.prox = prox
-
-        c.red, c.green, c.blue, c.ir = color_measurements['r'], color_measurements['g'], color_measurements['b'], color_measurements['ir']
-
+        if args.ir:
+            c.red, c.green, c.blue, c.ir = color_measurements['r'], color_measurements['g'], color_measurements['b'], color_measurements['ir']
+        else:
+            c.red, c.green, c.blue = color_measurements['r'], color_measurements['g'], color_measurements['b']
         # log data
         logging.log(logging.DEBUG, f"Data: {color_measurements}")
         if args.proximity:
