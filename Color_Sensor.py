@@ -122,8 +122,12 @@ def update_vals():
                 color_measurements["ir"] = round(clamp(random.randint(0, 255) * args.ir_weight, 0, 255))
 
         if args.proximity:
-            prox = get_prox()
-            c.prox = prox
+            if args.virtual:
+                prox = random.randint(0, 65535)
+            else:
+                prox = get_prox()
+
+        c.prox = prox
 
         # send data to networktables
         c.red, c.green, c.blue, c.ir = color_measurements['r'], color_measurements['g'], color_measurements['b'], \
