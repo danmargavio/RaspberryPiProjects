@@ -5,7 +5,6 @@ By: Kevin Ahr
 
 import threading
 import time
-import tkinter as tk
 import argparse
 import logging
 
@@ -16,18 +15,15 @@ __version__ = "1.0"
 __author__ = "Kevin Ahr"
 
 # device properties
-DEVICE_ADDRESS = 0x52  # 7 bit address (will be left shifted to add the read write bit)
+DEVICE_ADDRESS = 0x52  # 7 bit device address
 DEVICE_REG_MAIN_STATUS = 0x07  # main status register
 MAIN_CTRL = 0x00  # operation mode control
 LS_DATA_GREEN_0 = 0x0D  # First Green Register
 LS_DATA_RED_0 = 0x13  # First Red Register
 LS_DATA_BLUE_0 = 0x10  # First Blue Register
-LS_DATA_IR_0 = 0x0A
-LS_DATA_GREEN_1 = 0x0E  # Second Green Register
-LS_DATA_RED_1 = 0x14  # Second Red Register
-LS_DATA_BLUE_1 = 0x11  # Second Blue Register
-PS_DATA_0 = 0x08
-PS_DATA_1 = 0x09
+LS_DATA_IR_0 = 0x0A  # First IR Register
+PS_DATA_0 = 0x08  # First Prox Register
+PS_DATA_1 = 0x09  # Second Prox Register
 
 global root, ir, data_label, prox_label
 
@@ -53,7 +49,7 @@ args = parser.parse_args()
 
 # NT Client
 class Client(object):
-    """Demonstrates an object with magic networktables properties"""
+    """ Object with networktables properties """
     red = ntproperty("/SmartDashboard/colorSensorRed", 0)
     green = ntproperty("/SmartDashboard/colorSensorGreen", 0)
     blue = ntproperty("/SmartDashboard/colorSensorBlue", 0)
@@ -64,47 +60,61 @@ class Client(object):
         prox = ntproperty("/SmartDashboard/colorSensorProx", 0)
 
 
-def rgb_to_hex(r, g, b):
-    """Convert RGB Value to Hex Color Codes"""
-    return "#{:02x}{:02x}{:02x}".format(r, g, b)
+def rgb_to_hex(red, green, blue):
+    """ Convert RGB Value to Hex Color Codes """
+    return "#{:02x}{:02x}{:02x}".format(red, green, blue)
+
 
 def get_rgb():
+    """ Get RGB and IR values from sensor """
     colors = [0, 0, 0, 0]
-    colors[0] = bus.read_byte_data(DEVICE_ADDRESS, LS_DATA_RED_0) + 256 * bus.read_byte_data(DEVICE_ADDRESS, LS_DATA_RED_0 + 0x01) + 65536 * bus.read_byte_data(DEVICE_ADDRESS, LS_DATA_RED_0 + 0x02)
-    colors[1] = bus.read_byte_data(DEVICE_ADDRESS, LS_DATA_GREEN_0) + 256 * bus.read_byte_data(DEVICE_ADDRESS, LS_DATA_GREEN_0 + 0x01) + 65536 * bus.read_byte_data(DEVICE_ADDRESS, LS_DATA_GREEN_0 + 0x02)
-    colors[2] = bus.read_byte_data(DEVICE_ADDRESS, LS_DATA_BLUE_0) + 256 * bus.read_byte_data(DEVICE_ADDRESS, LS_DATA_BLUE_0 + 0x01) + 65536 * bus.read_byte_data(DEVICE_ADDRESS, LS_DATA_BLUE_0 + 0x02)
-    colors[3] = bus.read_byte_data(DEVICE_ADDRESS, LS_DATA_IR_0) + 256 * bus.read_byte_data(DEVICE_ADDRESS, LS_DATA_IR_0 + 0x01) + 65536 * bus.read_byte_data(DEVICE_ADDRESS, LS_DATA_IR_0 + 0x02)
+    colors[0] = bus.read_byte_data(DEVICE_ADDRESS, LS_DATA_RED_0) + 256 * \
+        bus.read_byte_data(DEVICE_ADDRESS, LS_DATA_RED_0 + 0x01) + 65536 * \
+        bus.read_byte_data(DEVICE_ADDRESS, LS_DATA_RED_0 + 0x02)
+    colors[1] = bus.read_byte_data(DEVICE_ADDRESS, LS_DATA_GREEN_0) + 256 * \
+        bus.read_byte_data(DEVICE_ADDRESS, LS_DATA_GREEN_0 + 0x01) + 65536 * \
+        bus.read_byte_data(DEVICE_ADDRESS, LS_DATA_GREEN_0 + 0x02)
+    colors[2] = bus.read_byte_data(DEVICE_ADDRESS, LS_DATA_BLUE_0) + 256 * \
+        bus.read_byte_data(DEVICE_ADDRESS, LS_DATA_BLUE_0 + 0x01) + 65536 * \
+        bus.read_byte_data(DEVICE_ADDRESS, LS_DATA_BLUE_0 + 0x02)
+    colors[3] = bus.read_byte_data(DEVICE_ADDRESS, LS_DATA_IR_0) + 256 * \
+        bus.read_byte_data(DEVICE_ADDRESS, LS_DATA_IR_0 + 0x01) + 65536 * \
+        bus.read_byte_data(DEVICE_ADDRESS, LS_DATA_IR_0 + 0x02)
     return colors
 
+
 def get_prox():
+    """ Get Proximity from Sensor """
     data = bus.read_byte_data(DEVICE_ADDRESS, PS_DATA_0) + 256 * bus.read_byte_data(DEVICE_ADDRESS, PS_DATA_1)
     return data
 
 
-def clamp(n, minn, maxn):
-    """Clamp Input to Min/Max"""
-    return max(min(maxn, n), minn)
+def clamp(val, minn, maxn):
+    """ Clamp Input to Min/Max """
+    return max(min(maxn, val), minn)
 
 
 def update_vals():
     color_measurements = {"r": 0, "g": 0, "b": 0}
+    prox = 0
 
     if args.ir:
         color_measurements["ir"] = 0
 
-    # Init
     if not args.virtual:
-        bus.write_byte_data(DEVICE_ADDRESS, MAIN_CTRL, 0x07)
-        bus.write_byte_data(DEVICE_ADDRESS, 0x05, 0b00000100) # set gain to 18
+        bus.write_byte_data(DEVICE_ADDRESS, MAIN_CTRL, 0x07)  # init sensor
+        bus.write_byte_data(DEVICE_ADDRESS, 0x05, 0b00000100)  # set gain to 18
     while True:
         if not args.virtual:
             colors = get_rgb()
-            color_measurements["r"] = round(clamp(colors[0] / 2048 * args.red_weight,0, 255))
+            # get data from sensor
+            color_measurements["r"] = round(clamp(colors[0] / 2048 * args.red_weight, 0, 255))
             color_measurements["g"] = round(clamp(colors[1] / 2048 * args.green_weight, 0, 255))
             color_measurements["b"] = round(clamp(colors[2] / 2048 * args.blue_weight, 0, 255))
             if args.ir:
                 color_measurements["ir"] = round(clamp(colors[3] / 2048 * args.ir_weight, 0, 255))
         else:
+            # generate random values
             color_measurements["r"] = round(clamp(random.randint(0, 255) * args.red_weight, 0, 255))
             color_measurements["g"] = round(clamp(random.randint(0, 255) * args.green_weight, 0, 255))
             color_measurements["b"] = round(clamp(random.randint(0, 255) * args.blue_weight, 0, 255))
@@ -115,7 +125,9 @@ def update_vals():
             prox = get_prox()
             c.prox = prox
 
-        c.red, c.green, c.blue, c.ir = color_measurements['r'], color_measurements['g'], color_measurements['b'], color_measurements['ir']
+        # send data to networktables
+        c.red, c.green, c.blue, c.ir = color_measurements['r'], color_measurements['g'], color_measurements['b'], \
+            color_measurements['ir']
 
         # log data
         logging.log(logging.DEBUG, f"Data: {color_measurements}")
@@ -123,14 +135,16 @@ def update_vals():
             logging.log(logging.DEBUG, f"Prox: {prox}")
 
         if args.gui:
+            # change bg color
             root.configure(bg=rgb_to_hex(color_measurements["r"], color_measurements["g"], color_measurements["b"]))
-            data_label.configure(text=color_measurements)
+            data_label.configure(text=color_measurements)  # change label text
 
             if args.ir:
-                ir.configure(bg=rgb_to_hex(color_measurements["ir"], color_measurements["ir"], color_measurements["ir"]))
+                ir.configure(
+                    bg=rgb_to_hex(color_measurements["ir"], color_measurements["ir"], color_measurements["ir"]))
 
             if args.proximity:
-                prox_label.configure(text=f"prox: {prox}")
+                prox_label.configure(text=f"prox: {prox}")  # change label text
 
         time.sleep(args.rate)
 
@@ -139,6 +153,7 @@ def main():
     global root, ir, data_label, prox_label
 
     if args.gui:
+        # create main window
         root = tk.Tk()
         root.title("ColorView")
         root.geometry("240x240")
@@ -158,6 +173,7 @@ def main():
             prox_label = tk.Label(master=prox_frame, text="PROX")
             prox_label.pack()
 
+        # check --window-properties arg
         for prop in args.window_properties.split(','):
             prop = prop.split(":")
             if prop[0] == "size":
@@ -166,10 +182,12 @@ def main():
                 root.title(prop[1])
 
         if args.ir:
+            # create secondary IR window
             ir = tk.Toplevel()
             ir.title("IrView")
             ir.geometry("240x100")
 
+            # check --ir-window-properties arg
             for prop in args.ir_window_properties.split(','):
                 prop = prop.split(":")
                 if prop[0] == "size":
@@ -177,7 +195,7 @@ def main():
                 elif prop[0] == "title":
                     ir.title(prop[1])
 
-        # start thread
+        # start update thread
         thread = threading.Thread(target=update_vals, daemon=True)
         thread.start()
 
@@ -193,10 +211,12 @@ if __name__ == "__main__":
     else:
         logging.basicConfig(level=logging.INFO)
 
+    # import smbus2
     try:
         from smbus2 import SMBus
     except ImportError as err:
         logging.warning(f"Could not import SMBus2: {err}")
+        SMBus = None
 
     # open i2c bus
     if not args.virtual:
@@ -207,8 +227,12 @@ if __name__ == "__main__":
     else:
         import random
 
+    if args.gui:
+        import tkinter as tk
+
     # set up network tables
     NetworkTables.initialize(server=args.ip)
     c = Client()
 
+    # main loop
     main()
