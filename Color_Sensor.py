@@ -130,8 +130,9 @@ def update_vals():
         c.prox = prox
 
         # send data to networktables
-        c.red, c.green, c.blue, c.ir = color_measurements['r'], color_measurements['g'], color_measurements['b'], \
-            color_measurements['ir']
+        c.red, c.green, c.blue = color_measurements['r'], color_measurements['g'], color_measurements['b']
+        if args.ir:
+            c.ir = color_measurements['ir']
 
         # log data
         logging.log(logging.DEBUG, f"Data: {color_measurements}")
