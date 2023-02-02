@@ -186,6 +186,7 @@ def main():
             ir = tk.Toplevel()
             ir.title("IrView")
             ir.geometry("240x100")
+            ir.protocol("WM_DELETE_WINDOW", lambda: messagebox.showinfo("IrView", "Main window must be closed first."))
 
             # check --ir-window-properties arg
             for prop in args.ir_window_properties.split(','):
@@ -229,6 +230,7 @@ if __name__ == "__main__":
 
     if args.gui:
         import tkinter as tk
+        from tkinter import messagebox
 
     # set up network tables
     NetworkTables.initialize(server=args.ip)
