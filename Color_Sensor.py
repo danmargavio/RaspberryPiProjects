@@ -50,14 +50,14 @@ args = parser.parse_args()
 # NT Client
 class Client(object):
     """ Object with networktables properties """
-    red = ntproperty("/SmartDashboard/colorSensorRed", 0)
-    green = ntproperty("/SmartDashboard/colorSensorGreen", 0)
-    blue = ntproperty("/SmartDashboard/colorSensorBlue", 0)
+    red = ntproperty("/RevColorSensor_V3/colorSensorRed", 0)
+    green = ntproperty("/RevColorSensor_V3/colorSensorGreen", 0)
+    blue = ntproperty("/RevColorSensor_V3/colorSensorBlue", 0)
     if args.ir:
-        ir = ntproperty("/SmartDashboard/colorSensorIr", 0)
+        ir = ntproperty("/RevColorSensor_V3/colorSensorIr", 0)
 
     if args.proximity:
-        prox = ntproperty("/SmartDashboard/colorSensorProx", 0)
+        prox = ntproperty("/RevColorSensor_V3/colorSensorProx", 0)
 
 
 def rgb_to_hex(red, green, blue):
