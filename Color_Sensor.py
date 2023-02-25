@@ -7,6 +7,7 @@ import threading
 import time
 import argparse
 import logging
+import os
 
 from networktables import NetworkTables
 from networktables.util import ntproperty
@@ -24,6 +25,8 @@ LS_DATA_BLUE_0 = 0x10  # First Blue Register
 LS_DATA_IR_0 = 0x0A  # First IR Register
 PS_DATA_0 = 0x08  # First Prox Register
 PS_DATA_1 = 0x09  # Second Prox Register
+
+IN_PIN = 21  # BCM
 
 global root, ir, data_label, prox_label
 
@@ -139,6 +142,10 @@ def update_vals():
         if args.proximity:
             logging.log(logging.DEBUG, f"Prox: {prox}")
 
+        # button
+        if GPIO.input(IN_PIN):
+            os.system("systemctl poweroff")
+
         if args.gui:
             # change bg color
             root.configure(bg=rgb_to_hex(color_measurements["r"], color_measurements["g"], color_measurements["b"]))
@@ -230,8 +237,17 @@ if __name__ == "__main__":
             bus = SMBus(1)
         except Exception as err:
             logging.critical(f"Could not initialize SMBus: {err}")
+
+        import RPi.GPIO as GPIO
+
     else:
         import random
+
+        from RPiSim.GPIO import GPIO
+
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setwarnings(False)
+    GPIO.setup(IN_PIN, GPIO.IN)
 
     if args.gui:
         import tkinter as tk
