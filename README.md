@@ -22,7 +22,7 @@
     * `crontab -e`
     * Add the following
         
-       `@reboot python /home/pi/RaspberryPiProjects/Color_Sensor.py 10.63.69.2 -ir -p -rw 3.8 -gw 3 -bw 3.4 -iw 5`
+       `@reboot python /home/pi/RaspberryPiProjects/Color_Sensor.py -ip 10.63.69.2 -ir -p -rw 3.8 -gw 3 -bw 3.4 -iw 5`
 * Reboot
     
     `sudo reboot`
