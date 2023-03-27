@@ -8,6 +8,7 @@ import time
 import argparse
 import logging
 import os
+import re
 
 from networktables import NetworkTables
 from networktables.util import ntproperty
@@ -32,7 +33,7 @@ global root, ir, data_label, prox_label
 
 # parse command line args
 parser = argparse.ArgumentParser()
-parser.add_argument("ip", help="ip address to connect to")
+parser.add_argument("-ip", help="ip address to connect to", required=False, default="10.63.69.2")
 parser.add_argument("-ir", "--ir", action="store_true", help="enable ir")
 parser.add_argument("-p", "--proximity", action="store_true", help="enable prox. sensor")
 parser.add_argument("-g", "--gui", action="store_true", help="show color viewer gui")
@@ -47,7 +48,15 @@ parser.add_argument("-rw", "--red-weight", default=1, type=float, help="weight o
 parser.add_argument("-gw", "--green-weight", default=1, type=float, help="weight of green channel")
 parser.add_argument("-bw", "--blue-weight", default=1, type=float, help="weight of blue channel")
 parser.add_argument("-iw", "--ir-weight", default=1, type=float, help="weight of IR channel")
-args = parser.parse_args()
+args, unknown = parser.parse_known_args()
+
+for item in unknown:
+    if re.match(r"10\.\d+\.\d+\.\d$", item):
+        logging.warning("Using deprecated positional ip format")
+        args.ip = item
+    else:
+        logging.critical(f"Unknown positional argument {item}")
+        raise AttributeError(f"Unknown positional argument {item}")
 
 
 # NT Client
