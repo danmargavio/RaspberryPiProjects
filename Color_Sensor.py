@@ -97,7 +97,8 @@ def get_rgb():
 
 def get_prox():
     """ Get Proximity from Sensor """
-    data = bus.read_byte_data(DEVICE_ADDRESS, PS_DATA_0) + 256 * bus.read_byte_data(DEVICE_ADDRESS, PS_DATA_1)
+    data = bus.read_byte_data(DEVICE_ADDRESS, PS_DATA_0) + 256 * \
+           bus.read_byte_data(DEVICE_ADDRESS, PS_DATA_1)
     return data
 
 
@@ -127,11 +128,15 @@ def update_vals():
                 color_measurements["ir"] = round(clamp(colors[3] / 2048 * args.ir_weight, 0, 255))
         else:
             # generate random values
-            color_measurements["r"] = round(clamp(random.randint(0, 255) * args.red_weight, 0, 255))
-            color_measurements["g"] = round(clamp(random.randint(0, 255) * args.green_weight, 0, 255))
-            color_measurements["b"] = round(clamp(random.randint(0, 255) * args.blue_weight, 0, 255))
+            color_measurements["r"] = round(clamp(random.randint(0, 255) * args.red_weight,
+                                                  0, 255))
+            color_measurements["g"] = round(clamp(random.randint(0, 255) * args.green_weight,
+                                                  0, 255))
+            color_measurements["b"] = round(clamp(random.randint(0, 255) * args.blue_weight,
+                                                  0, 255))
             if args.ir:
-                color_measurements["ir"] = round(clamp(random.randint(0, 255) * args.ir_weight, 0, 255))
+                color_measurements["ir"] = round(clamp(random.randint(0, 255) * args.ir_weight,
+                                                       0, 255))
 
         if args.proximity:
             if args.virtual:
@@ -140,7 +145,8 @@ def update_vals():
                 prox = get_prox()
 
         # send data to networktables
-        c.red, c.green, c.blue = color_measurements['r'], color_measurements['g'], color_measurements['b']
+        c.red, c.green, c.blue = color_measurements['r'], color_measurements['g'], \
+                                 color_measurements['b']
         if args.ir:
             c.ir = color_measurements['ir']
         if args.proximity:
@@ -157,12 +163,14 @@ def update_vals():
 
         if args.gui:
             # change bg color
-            root.configure(bg=rgb_to_hex(color_measurements["r"], color_measurements["g"], color_measurements["b"]))
+            root.configure(bg=rgb_to_hex(color_measurements["r"], color_measurements["g"],
+                                         color_measurements["b"]))
             data_label.configure(text=color_measurements)  # change label text
 
             if args.ir:
                 ir.configure(
-                    bg=rgb_to_hex(color_measurements["ir"], color_measurements["ir"], color_measurements["ir"]))
+                    bg=rgb_to_hex(color_measurements["ir"], color_measurements["ir"],
+                                  color_measurements["ir"]))
 
             if args.proximity:
                 prox_label.configure(text=f"prox: {prox}")  # change label text
@@ -207,7 +215,8 @@ def main():
             ir = tk.Toplevel()
             ir.title("IrView")
             ir.geometry("240x100")
-            ir.protocol("WM_DELETE_WINDOW", lambda: messagebox.showinfo("IrView", "Main window must be closed first."))
+            ir.protocol("WM_DELETE_WINDOW",
+                        lambda: messagebox.showinfo("IrView", "Main window must be closed first."))
 
             # check --ir-window-properties arg
             for prop in args.ir_window_properties.split(','):
