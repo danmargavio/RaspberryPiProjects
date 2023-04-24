@@ -7,7 +7,10 @@
     `sudo apt update && sudo apt upgrade`
 * Install Dependencies
 
-    `sudo apt install openbox xinit python3-pip python3-tk lxterminal`
+    `sudo apt install python3-pip`
+* (OPTIONAL) Install GUI Dependencies
+
+  `sudo apt install openbox xinit python3-tk lxterminal`
 * Update pip
 
     `sudo python -m pip install --upgrade pip`
