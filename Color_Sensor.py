@@ -17,7 +17,7 @@ __version__ = "1.0"
 __author__ = "Kevin Ahr"
 
 # device properties
-DEVICE_ADDRESS = 0x52  # 7 bit device address
+DEVICE_ADDRESS = 0x52  # 7-bit device address
 DEVICE_REG_MAIN_STATUS = 0x07  # main status register
 MAIN_CTRL = 0x00  # operation mode control
 LS_DATA_GREEN_0 = 0x0D  # First Green Register
@@ -182,7 +182,7 @@ def main():
     global root, ir, data_label, prox_label
 
     if args.gui:
-        # create main window
+        # create the main window
         root = tk.Tk()
         root.title("ColorView")
         root.geometry("240x240")
@@ -211,7 +211,7 @@ def main():
                 root.title(prop[1])
 
         if args.ir:
-            # create secondary IR window
+            # create a secondary IR window
             ir = tk.Toplevel()
             ir.title("IrView")
             ir.geometry("240x100")
